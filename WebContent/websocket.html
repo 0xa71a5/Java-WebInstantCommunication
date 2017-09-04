@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content=" initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>测试</title>
+<script src="http://wow.techbrood.com/libs/jquery/jquery-1.11.1.min.js"></script>
+<link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
+
+<script type="text/javascript">
+    function parseJson(w)//将json字符串转换成json对象
+    {
+        return eval("("+w+")");
+    }
+
+    function getCookie(c_name)
+    {
+    if (document.cookie.length>0)
+      {
+      c_start=document.cookie.indexOf(c_name + "=")
+      if (c_start!=-1)
+        { 
+        c_start=c_start + c_name.length+1 
+        c_end=document.cookie.indexOf(";",c_start)
+        if (c_end==-1) c_end=document.cookie.length
+        return unescape(document.cookie.substring(c_start,c_end))
+        } 
+      }
+    return ""
+    }
+
+    //alert(getCookie("jessonid")+getCookie("username")+getCookie("loginState"));
+</script>
+
+<script type="text/javascript">
+
+    ws = new WebSocket('ws://127.0.0.1:8080/InstantCommunication/WebChat');//创建websocket连接 这里的ipAddress和lp由Tornado填充
+    Authenticate();
+    ws.onmessage = function(event) //当服务器发送给客户端数据的时候 客户端的响应函数
+                   {
+                        var recvStr=event.data;//输入参数的data成员变量包含了发送过来的数据
+                        $("#info").html(recvStr);
+                        if(recvStr[0]=='{')//第一个字符是左括号 默认此时是json字符串
+                        {
+                            pkg=parseJson(recvStr);
+                            PkgType=pkg.Type;
+                            PkgContent=pkg.Content;
+                            //alert("PkgType="+PkgType)
+                            if(pkg.Type=="DownloadFileResult")
+                            {
+                               // alert("DownloadUrl="+pkg.Content.downloadUrl);
+                               if(pkg.Content.actionResult.indexOf("success")!=-1)
+                                   window.open(pkg.Content.downloadUrl);
+                            }
+                            else if(pkg.Type=="SnapshotResult"||pkg.Type=="CameraShotResult")
+                            {
+                                window.open(pkg.Content.ImageUrl);
+                            }    
+                        }
+                   };
+
+    function Authenticate() {
+        var jessonid=getCookie("jessonid");
+        var username=getCookie("username");
+        var groupname=getCookie("groupname");
+        var content={
+            'username':username,
+            'groupname':groupname,
+            'jessonid':jessonid
+        };
+        var data = {
+                    'Type':'Authenticate',
+                    'Content':content
+                };
+        ws.send(JSON.stringify(data));
+        alert(JSON.stringify(data));
+    }
+
+    function sendMsg()
+    {
+        var value=document.getElementById("inputText").value;
+        var content={
+            'str':value
+        };
+        var data = {
+                    'Type':'Common',
+                    'Content':content
+                };//转换成json字符串发送，注意服务器接受到的实际上是字符串形式
+
+        ws.send(JSON.stringify(data));//通过websocket发送给服务器
+    }
+
+</script>
+
+</head>
+
+<body>
+    <br>
+    <br>
+    To Send: <input type="text" id="inputText" >&nbsp;&nbsp; <button onclick="sendMsg()">SEND</button>
+    <br>
+    Receive: <p id="info"></p>
+    <br>
+    <br>
+
+</body>
+
+</html>

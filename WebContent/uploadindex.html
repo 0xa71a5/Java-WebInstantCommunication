@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Testing websockets</title>
+</head>
+<body>
+  <div>
+    <input type="submit" value="Start1" onclick="start()" />
+  </div>  
+  <div>
+    <input type="submit" value="Start2" onclick="start2()" />
+  </div>
+  <div>
+    <input type="submit" value="Start3" onclick="start3()" />
+  </div>
+  
+  <div>
+    <input type="submit" value="message" onclick="message()" />
+  </div>
+  <div><a href="/JavaWebsocket/Upload.jsp">To upload a file</a> </div>
+  <div id="messages"></div>
+  <script type="text/javascript">
+    var webSocket = 
+      new WebSocket('ws://localhost:8080/JavaWebsocket/WebChat');
+
+    webSocket.onerror = function(event) {
+      onError(event)
+    };
+
+    webSocket.onopen = function(event) {
+      onOpen(event)
+    };
+
+    webSocket.onmessage = function(event) {
+      onMessage(event)
+    };
+
+    function onMessage(event) {
+      document.getElementById('messages').innerHTML 
+        += '<br />' + event.data;
+    }
+
+    function onOpen(event) {
+      document.getElementById('messages').innerHTML 
+        = 'Connection established';
+    }
+
+    function onError(event) {
+      alert(event.data);
+    }
+
+    function start() {
+      var json={'type':'Update',
+    		  'content':{
+    			  'username':'qwe',
+    			  'jessonid':'123',
+    			  'groupname':'group1'
+    			  }
+      }
+      webSocket.send(JSON.stringify(json));
+      return false;
+    }
+    function start2() {
+        var json={'type':'Update',
+      		  'content':{
+      			  'username':'asd',
+      			  'jessonid':'123',
+      			  'groupname':'group2'
+      			  }
+        }
+        webSocket.send(JSON.stringify(json));
+        return false;
+      }
+    function start3() {
+        var json={'type':'Update',
+      		  'content':{
+      			  'username':'zxc',
+      			  'jessonid':'123',
+      			  'groupname':'group3'
+      			  }
+        }
+        webSocket.send(JSON.stringify(json));
+        return false;
+      }
+    
+    function message(){
+    	var json={'type':'Chat',
+    		  'content':{
+    			  'from':'adf',
+    			  'to':'hehe',
+    			  'content':'666'
+    			  }
+      }
+      webSocket.send(JSON.stringify(json));
+    }
+  </script>
+</body>
+</html>

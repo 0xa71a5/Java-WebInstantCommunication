@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+<div id="wrapper" class="login-page">
+    <div id="login_form" class="form">
+        <form class="register-form" method="post" action="regist" id="registform">
+            <h3>
+                <bold>注册</bold>
+            </h3>
+            <input type="text" placeholder="用户名" id="r_username" required="" name="username"/>
+            <input type="text" placeholder="昵称" id="r_nickname" required="" name="nickname"/>
+            <input type="password" placeholder="密码" id="r_password" required="" name="password"/>
+            <input type="text" placeholder="公司邮箱" id="r_email" required="" name="email"/>
+            <input type="text" placeholder="手机号码" id="r_telephone" required="" name="telephone"/>
+            <div>
+                <label class="control-label department-label">公司部门：</label>
+                <select id="r_department" required="" name="department"/>
+                <option value="department1">办公室</option>
+                <option value="department2">技术部</option>
+                <option value="department3">生产部</option>
+                <option value="department4">财务部</option>
+                <option value="department5">营销部</option>
+                </select>
+            </div>
+            <div class=" gender">
+                <label class="control-label radio-label">性别：</label>
+                <label class="radio-inline radio-gender">
+                    <input type="radio" id="optionsRadios1" value="male" required="" name="gender" checked>
+                    男
+                </label>
+                <label class="radio-inline radio-gender1">
+                    <input type="radio" id="optionsRadios2" value="female" required="" name="gender">
+                    女
+                </label>
+            </div>
+            <!--
+            <div class=" checkcode">
+                <img src="img/checkcode.jpg">
+                <input type="text" placeholder="验证码" required="" name="checkcode"/>
+            </div>
+            -->
+            <p class="message">已经有了一个账户? <a href="#">立刻登录</a></p>
+            <button type="submit" id="regist" value="regist">创建账户</button>
+        </form>
+
+        <form class="login-form" method="post" action="login" id="loginform">
+            <h3>
+                <bold>登录</bold>
+            </h3>
+            <input type="text" placeholder="用户名" id="username" required="" name="username"/>
+            <input type="password" placeholder="密码" id="password" required="" name="password"/>
+            <!--
+            <div class="checkcode">
+                <img src="img/checkcode.jpg">
+                <input type="text" placeholder="验证码" class="r_checkcode" required="" name="checkcode"/>
+            </div>
+            -->
+            <p class="message">还没有账户? <a href="#">立刻创建</a></p>
+            <button type="submit" value="Submit" id="login">登　录</button>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    function auto_fill()
+    {
+        var randomstr=parseInt(Math.random()*10000000)+"";
+        $("#r_username").val("test"+randomstr);
+        $("#r_nickname").val("test"+randomstr);
+        $("#r_password").val("123123");
+        $("#r_email").val("test@test.com");
+        $("#r_telephone").val("15850630300");           
+    }
+
+    function check_login() {
+        var username = $("#username").val();
+        var password = $("#password").val();
+        //var checkcode = $("#checkcode").val();
+    }
+    function check_register() {
+        var r_username = $("#r_username").val();
+        var r_password = $("#r_password").val();
+        var r_nickname = $("#r_nickname").val();
+        var r_email = $("#r_email").val();
+        var r_telephone = $("#r_telephone").val();
+        var r_department = $("#r_department").val();
+        var r_gender = $("input[type=radio][name=gender][checked]").val();
+        //var r_checkcode = $("#r_checkcode").val();
+    }
+
+    $(function () {
+        $("#login").click(function () {
+            check_register();
+            return false;
+        })
+        $("#regist").click(function () {
+            check_login();
+            return false;
+        })
+        $('.message a').click(function () {
+            $('form').animate({
+                height: 'toggle',
+                opacity: 'toggle'
+            }, 'slow');
+        });
+        $("#regist").click(function () {
+            $("#registform").submit();
+            //alert("已提交");
+        })
+        $("#login").click(function () {
+            $("#loginform").submit();
+            //alert("已提交");
+        })
+    })
+</script>
+</html>

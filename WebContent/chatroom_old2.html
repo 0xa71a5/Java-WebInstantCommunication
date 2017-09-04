@@ -1,0 +1,642 @@
+<html>
+<head>
+    <title>企业即时聊天</title>
+    <meta charset="UTF-8">
+
+    <link href="css/chatroom.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <script language="javascript" src="JS/AjaxRequest.js"></script>
+    <script>
+        function parseJson(w) {
+            return eval("(" + w + ")");
+        }
+        function test_onmessage(recvStr) {
+            console.log("recvStr:" + recvStr);
+            var jsonObject = parseJson(recvStr);//将字符串转换成json
+            var Type = jsonObject["Type"];        //获取json的Type字段
+            var Content = jsonObject["Content"];  //获取json的Content字段
+            var isAdmin;
+            if (Type == "getMyIdentifyResult") {//获取我的用户名
+                selfName = Content["username"];
+                isAdmin = Content["isAdmin"];
+                document.getElementById("button_info").value = selfName;
+            }
+            else if (Type == "getAllUsersResult") {//获取当前所有用户信息  包括了在线和不在线的
+                var html = "<input id='searchContent' type='text' size=50% value='' onKeyDown='if(event.keyCode==13 ){searchUser();}'/><input name='search_submit' type='button' class='btn_grey' value='搜索' onClick='searchUser()'/>";
+                var num = parseInt(Content["amount"]);//获取元素数量字段
+                for (var i = 0; i < num; i++) {
+                    var username = Content[i + ""]["username"];//获取用户名
+                    var userstate = Content[i + ""]["userstate"];//获取用户在线状态
+                    html = html + "<input type='button' class='" + userstate + "' value='" + username + "' onClick='showMsgToUser(\"" + username + "\")'/><br><br>";
+                }
+                mainList.innerHTML = html;
+            }
+
+            else if (Type == "getGroupsResult") {
+                var html = "";
+                var num = parseInt(Content["amount"]);//获取元素数量字段
+                for (var i = 0; i < num; i++) {
+                    var groupname = Content[i + ""]["groupname"];//获取群组名
+                    html = html + "<input type='button' class='btn_grey' value='" + groupname + "'  onClick='showMsgToGroup(\"" + groupname + "\")'/> <br><br>";
+                }
+                mainList.innerHTML = html;
+            }
+
+            else if (Type == "getGroupHistoryMsgResult") {
+                for (var i = 0; i < chartList.length; i++) {
+                    if (Content["name"] == chartList[i]["name"]) {
+                        var num = parseInt(Content["amount"]);
+                        for (var j = 0; j < num; j++) {
+                            chartList[i]["html"] += "<font color='blue'>" + Content[j + ""]["from"] + ":</font><font color='blue'>" + Content[j + ""]["message_content"] + "</font><br>";
+                        }
+                        member.innerHTML = chartList[i]["extraHtml"];
+                        msgContent.innerHTML = chartList[i]["html"];
+                    }
+                }
+            }
+            else if (Type == "getUserHistoryMsgResult") {
+                for (var i = 0; i < chartList.length; i++) {
+                    if (Content["name"] == chartList[i]["name"]) {
+                        var num = parseInt(Content["amount"]);
+                        for (var j = 0; j < num; j++) {
+                            chartList[i]["html"] += "<font color='blue'>" + Content[j + ""]["from"] + ":</font><font color='blue'>" + Content[j + ""]["message_content"] + "</font><br>";
+                        }
+                        member.innerHTML = chartList[i]["extraHtml"];
+                        msgContent.innerHTML = chartList[i]["html"];
+                    }
+                }
+            }
+            else if (Type == "searchResult") {
+                var html = "<input id='searchContent' type='text' size=50% value='' onKeyDown='if(event.keyCode==13){searchUser();}'/><input name='search_submit' type='button' class='btn_grey' value='搜索' onClick='searchUser()'/>";
+                var num = parseInt(Content["amount"]);
+                for (var i = 0; i < num; i++) {
+                    var username = Content[i + ""]["username"];
+                    var userstate = Content[i + ""]["userstate"];
+                    html = html + "<input type='button' class='" + userstate + "' value='" + username + "' onClick='showMsgToUser(\"" + username + "\")'/>";
+                }
+                mainList.innerHTML = html;
+            }
+            else if (Type == "getNewMessageResult") {
+                if(Content["message_type"]=="post"){
+                alert("公告："+Content["message_content"]+"!!!!!!");
+            }else{
+                    var flag = true;
+                    for (var i = 0; i < chartList.length; i++) {
+                        if (Content["from"] == chartList[i]["name"] || Content["to"] == chartList[i]["name"]) {
+                            chartList[i]["html"] += "<font color='blue'>" + Content["from"] + ":</font><font color='blue'>" + Content["message_content"] + "</font><br>";
+                            flag = false;
+                        }
+                        if (Content["from_type"] == "user" || object_type == "group") {
+                            if (msg_to == chartList[i]["name"]) {
+                                msgContent.innerHTML = chartList[i]["html"];
+                            }
+                        }
+                    }
+                    if (flag) {
+                        if (Content["from_type"] == "group") {
+                            showMsgToGroup(Content["to"]);
+                            /*
+                             msg_to=Content["to"];
+                             object_type="group";
+                             chartList.push({'name':Content["to"],'type':'group','html':'','extraHtml':''});
+                             chart.innerHTML+="<input    id="+msg_to+" type='button' class='btn_grey' value="+msg_to+"   onClick='change(\""+msg_to + "\",\"" +'group'+"\")'/>";
+                             chart.innerHTML+="<input type='button' class='btn_grey' value='×'   onClick='delChart(\""+msg_to+"\")'/>";
+                             */
+                        } else {
+                            showMsgToUser(Content["from"]);
+                            /*
+                             msg_to=Content["from"];
+                             object_type="user";
+                             chartList.push({'name':msg_to,'type':'user','html':'','extraHtml':''});
+                             chart.innerHTML+="<input id="+msg_to+" type='button' class='btn_grey' value="+msg_to+"  onClick='change(\""+msg_to + "\",\"" +'user'+"\")'/>";
+                             chart.innerHTML+="<input type='button' class='btn_grey' value='×'   onClick='delChart(\""+msg_to+"\")'/>";
+                             */
+                        }
+                    }
+                }
+            }
+            else if (Type == "getUserIdentifyResult") {
+
+            }
+        }
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=")
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1
+                    c_end = document.cookie.indexOf(";", c_start)
+                    if (c_end == -1) c_end = document.cookie.length
+                    return unescape(document.cookie.substring(c_start, c_end))
+                }
+            }
+            return ""
+        }
+    </script>
+    <script language="javascript">
+        var selfName;
+        var msg_to;
+        var object_type;
+        var msg_from;
+        var chartList = new Array();
+        var isAdmin = "0";
+        var showCont = {};
+        ws = new WebSocket('ws://127.0.0.1:8080/InstantCommunication/WebChat');
+        ws.onopen = function ()//在websocket建立完成后发送身份认证 同时 服务器会返回当前用户信息
+        {
+            var jessonid = getCookie("jessonid");//jessonid用来作为身份认证的凭证
+            var username = getCookie("username");
+            var groupname = getCookie("groupname");
+            var content = {
+                'username': username,
+                'groupname': groupname,
+                'jessonid': jessonid
+            };
+            var data = {
+                'Type': 'Authenticate',
+                'Content': content
+            };
+            ws.send(JSON.stringify(data));
+        };
+
+        /*
+         window.onload = function() {
+         chart.innerHTML="";
+         var group_name="asdw";
+         var group_name2="12314";
+         chart.innerHTML+="<input  id="+group_name+" type='button' class='btn_grey' value="+group_name+" onClick='change(\""+group_name + "\",\"" +'group'+"\")'/>";
+         chart.innerHTML+="<input type='button' class='btn_grey' value='×'	onClick='delChart(\""+group_name+"\")'/>";
+         chart.innerHTML+="<input  id="+group_name2+" type='button' class='btn_grey' value="+group_name2+" onClick='change(\""+group_name2 + "\",\"" +'group'+"\")'/>";
+         chart.innerHTML+="<input type='button' class='btn_grey' value='×12'	onClick='delChart(\""+group_name2+"\")'/>";
+
+         alert(chart.innerHTML);
+         }
+         */
+
+
+        ws.onmessage = function (event) {
+            var recvStr = event.data;//获取websocket的数据
+            console.log("recvStr:" + recvStr);
+            var jsonObject = parseJson(recvStr);//将字符串转换成json
+            var Type = jsonObject["Type"];		//获取json的Type字段
+            var Content = jsonObject["Content"];	//获取json的Content字段
+
+
+            if (Type == "getMyIdentifyResult") {//获取我的用户名
+                selfName = Content["username"];
+                isAdmin = Content["isAdmin"];
+                document.getElementById("button_info").value = "用户姓名" + selfName;
+                if(isAdmin=="1")
+                {
+                    document.getElementById("postButton").style.display="inline-block";
+                }
+                else
+                {
+                    document.getElementById("postButton").style.display="none";
+                }
+            }
+            else if (Type == "getAllUsersResult") {//获取当前所有用户信息  包括了在线和不在线的
+                var html = "<input id='searchContent' type='text' size=50% value='' onKeyDown='if(event.keyCode==13 ){searchUser();}'/><input name='search_submit' type='button' class='btn_grey' value='搜索' onClick='searchUser()'/><br>";
+                var num = parseInt(Content["amount"]);//获取元素数量字段
+                for (var i = 0; i < num; i++) {
+                    var username = Content[i + ""]["username"];//获取用户名
+                    var userstate = Content[i + ""]["userstate"];//获取用户在线状态
+                    html = html + "<input type='button' class='" + userstate + "' value='" + username + "' onClick='showMsgToUser(\"" + username + "\")'/><br>";
+                }
+                mainList.innerHTML = html;
+            }
+
+            else if (Type == "getGroupsResult") {
+                var html = "<input id='addGroup' type='text' size=50% value='' onKeyDown='if(event.keyCode==13 ){addGroup();}'/><input name='addGroup_sub' type='button' class='btn_grey' value='创建群组' onClick='addGroup()'/><br>";
+                var num = parseInt(Content["amount"]);//获取元素数量字段
+                for (var i = 0; i < num; i++) {
+                    var groupname = Content[i + ""]["groupname"];//获取群组名
+                    html = html + "<input type='button' class='btn_grey' value='" + groupname + "' 	onClick='showMsgToGroup(\"" + groupname + "\")'/>";
+                    if (Content[i + ""]["selfJoined"] == "1") {
+                        html = html + "<input id='applyJoin" + groupname + "' type='button' class='btn_grey' value='已加入'/><br>";
+                    } else {
+                        html = html + "<input id='applyJoin" + groupname + "' type='button' class='btn_grey'  value='申请加入' 	onClick='applyToJoin(\"" + groupname + "\")'/><br>";
+                    }
+                }
+                mainList.innerHTML = html;
+            }
+
+            else if (Type == "getGroupHistoryMsgResult") {
+                for (var i = 0; i < chartList.length; i++) {
+                    if (Content["name"] == chartList[i]["name"]) {
+                        var num = parseInt(Content["amount"]);
+                        for (var j = 0; j < num; j++) {
+                            chartList[i]["html"] += "<font color='blue'>" + Content[j + ""]["from"] + ":</font><font color='blue'>" + Content[j + ""]["message_content"] + "</font> <br>";
+                        }
+                        member.innerHTML = chartList[i]["extraHtml"];
+                        msgContent.innerHTML = chartList[i]["html"];
+                    }
+                }
+            }
+            else if (Type == "getUserHistoryMsgResult") {
+
+                for (var i = 0; i < chartList.length; i++) {
+                    if (Content["name"] == chartList[i]["name"]) {
+                        var num = parseInt(Content["amount"]);
+                        for (var j = 0; j < num; j++) {
+                            chartList[i]["html"] += "<font color='blue'>" + Content[j + ""]["from"] + ":</font><font color='blue'>" + Content[j + ""]["message_content"] + "</font><br>";
+                        }
+                        member.innerHTML = chartList[i]["extraHtml"];
+                        msgContent.innerHTML = chartList[i]["html"];
+                    }
+                }
+            }
+            else if (Type == "searchResult") {
+                var html = "<input id='searchContent' type='text' size=50% value='' onKeyDown='if(event.keyCode==13 ){searchUser();}'/><input name='search_submit' type='button' class='btn_grey' value='搜索' onClick='searchUser()'/><br>";
+                var num = parseInt(Content["amount"]);
+                for (var i = 0; i < num; i++) {
+                    var username = Content[i + ""]["username"];
+                    var userstate = Content[i + ""]["userstate"];
+                    html = html + "<input type='button' class='" + userstate + "' value='" + username + "' onClick='showMsgToUser(\"" + username + "\")'/><br>";
+                }
+                mainList.innerHTML = html;
+            }
+            else if (Type == "getNewMessageResult") {
+                if(Content["message_type"]=="post"){
+                alert("公告："+Content["message_content"]);
+            }
+            else{
+
+                        var flag = true;
+                        for (var i = 0; i < chartList.length; i++) {
+                            if (Content["from"] == chartList[i]["name"] || Content["to"] == chartList[i]["name"]) {
+                                chartList[i]["html"] += "<font color='blue'>" + Content["from"] + ":</font><font color='blue'>" + Content["message_content"] + "</font><br>";
+                                flag = false;
+                            }
+                            if (Content["from_type"] == "user" || object_type == "group") {
+                                if (msg_to == chartList[i]["name"]) {
+                                    msgContent.innerHTML = chartList[i]["html"];
+                                }
+                            }
+                        }
+                        if (flag) {
+                            if (Content["from_type"] == "group") {
+                                showMsgToGroup(Content["to"]);
+                                /*
+                                 msg_to=Content["to"];
+                                 object_type="group";
+                                 chartList.push({'name':Content["to"],'type':'group','html':'','extraHtml':''});
+                                 chart.innerHTML+="<input	id="+msg_to+" type='button' class='btn_grey' value="+msg_to+"	onClick='change(\""+msg_to + "\",\"" +'group'+"\")'/>";
+                                 chart.innerHTML+="<input type='button' class='btn_grey' value='×'	onClick='delChart(\""+msg_to+"\")'/>";
+                                 */
+                            } else {
+                                showMsgToUser(Content["from"]);
+                                /*
+                                 msg_to=Content["from"];
+                                 object_type="user";
+                                 chartList.push({'name':msg_to,'type':'user','html':'','extraHtml':''});
+                                 chart.innerHTML+="<input id="+msg_to+" type='button' class='btn_grey' value="+msg_to+"	onClick='change(\""+msg_to + "\",\"" +'user'+"\")'/>";
+                                 chart.innerHTML+="<input type='button' class='btn_grey' value='×'	onClick='delChart(\""+msg_to+"\")'/>";
+                                 */
+                            }
+                        }
+                }
+            }
+            else if (Type == "createNewGroupResult") {
+                if (Content["result"] == "success") {
+                    mainList.innerHTML += "<input type='button' class='btn_grey' value='" + Content["groupname"] + "' onClick='showMsgToGroup(\"" + Content["groupname"] + "\")'/>";
+                    mainList.innerHTML += "<input id='applyJoin" + Content["groupname"] + "' type='button'  value='已加入'/><br>";
+                    alert("成功创建群组" + Content["groupname"]);
+                }
+            }
+            else if (Type == "joinGroupResult") {
+                if (Content["result"] == "success") {
+                    document.getElementById("applyJoin" + Content["groupname"]).value = "已加入";
+                    alert("成功加入群组" + Content["groupname"]);
+                }
+            }
+            else if (Type == "getGroupMembersResult") {
+                var num = parseInt(Content["amount"]);
+                for (var i = 0; i < chartList.length; i++) {
+                    if (chartList[i]["name"] == Content["name"]) {
+                        chartList[i]["extraHtml"] = "";
+                        for (var j = 0; j < num; j++) {
+                            chartList[i]["extraHtml"] += "<font >" + Content[j + ""] + "</font><br>";
+                        }
+                        break;
+                    }
+                }
+            }
+            else if (Type == "getUserIdentifyResult") {
+
+            }
+        }
+
+        function showSelfInfo() {
+            if (isAdmin == "0") {
+                window.open("profile");
+                //window.open("profile",'newwindow','height=800, width=400, top=90, left=800, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, status=no');
+            } else {
+                window.open("admin");
+                //window.open("admin",'newwindow','height=800, width=400, top=90, left=800, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, status=no');
+            }
+        }
+
+        function addGroup() {
+            var content = {
+                "groupname": document.getElementById("addGroup").value
+            }
+            var com = {
+                "Type": "createNewGroup",
+                "Content": content
+            }
+            ws.send(JSON.stringify(com));
+        }
+
+        function getGroupUser(groupname) {
+            var content = {
+                "groupname": groupname
+            }
+            var com = {
+                "Type": "getGroupMembers",
+                "Content": content
+            }
+            ws.send(JSON.stringify(com));
+        }
+
+        function applyToJoin(groupname) {
+            var content = {
+                "groupname": groupname
+            }
+            var com = {
+                "Type": "joinGroup",
+                "Content": content
+            }
+            ws.send(JSON.stringify(com));
+        }
+        function showGroup() {
+            var content = {'action': 'none'};
+            var com = {
+                'Type': 'getGroups',
+                'Content': content
+            }
+            ws.send(JSON.stringify(com));
+        }
+
+        function delChart(part_id) {
+            for (var i = 0; i < chartList.length; i++) {
+                if (chartList[i]["name"] == part_id) {
+                    chartList.remove(i);
+                    break;
+                }
+            }
+            alert(part_id);
+            alert(chart.innerHTML);
+            var reg = new RegExp("<input.*?id=\"" + part_id + "\".*?>", "g");
+            var temp = chart.innerHTML.replace(reg, "");
+            alert(temp);
+            chart.innerHTML = temp;
+            //删除列表栏目
+        }
+
+
+        function showUsers() {
+            var content = {'action': 'none'};
+            var com = {
+                'Type': 'getAllUsers',
+                'Content': content
+            }
+            ws.send(JSON.stringify(com));
+        }
+
+        function showMsgToGroup(group_name) {
+            var flag = true;
+            msg_to = group_name;
+            object_type = "group";
+            for (var i = 0; i < chartList.length; i++) {
+                if (group_name == chartList[i]["name"]) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                chartList.push({'name': group_name, 'type': 'group', 'html': '', 'extraHtml': ''});
+                getGroupUser(group_name);
+                chart.innerHTML += "<input	id=" + group_name + " type='button' class='btn_grey' value=" + group_name + "	onClick='change(\"" + group_name + "\",\"" + 'group' + "\")'/>";
+                chart.innerHTML += "<input type='button' class='btn_grey' value='×'	onClick='delChart(\"" + group_name + "\")'/>";
+                var content = {
+                    'groupname': group_name,
+                    'begintime': "1504108800",
+                    'endtime': "1504195200"
+                };
+                var com = {
+                    'Type': 'getGroupHistoryMsg',
+                    'Content': content
+                }
+                ws.send(JSON.stringify(com));
+            } else {
+                change(group_name, "group");
+            }
+        }
+
+        function showMsgToUser(user_name) {
+            var flag = true;
+            msg_to = user_name;
+            object_type = "user";
+            for (var i = 0; i < chartList.length; i++) {
+                if (user_name == chartList[i]["name"]) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                chartList.push({'name': user_name, 'type': 'user', 'html': '', 'extraHtml': ''});
+                chart.innerHTML += "<input id=" + user_name + " type='button' class='btn_grey' value=" + user_name + "	onClick='change(\"" + user_name + "\",\"" + 'user' + "\")'/>";
+                chart.innerHTML += "<input type='button' class='btn_grey' value='×'	onClick='delChart(\"" + user_name + "\")'/>";
+                var content = {
+                    'username': user_name,
+                    'begintime': "1504108800",
+                    'endtime': "1504195200"
+                };
+                var com = {
+                    'Type': 'getUserHistoryMsg',
+                    'Content': content
+                }
+                ws.send(JSON.stringify(com));
+            } else {
+                change(user_name, "user");
+            }
+        }
+
+        function change(name, type) {
+            msg_to = name;
+            object_type = type;
+            for (var i = 0; i < chartList.length; i++) {
+                if (name == chartList[i]["name"]) {
+                    msgContent.innerHTML = chartList[i]["html"];
+                    if (object_type == "group") {
+                        getGroupUser(name);
+                        member.innerHTML = chartList[i]["extraHtml"];
+                    }
+                }
+            }
+        }
+        function getUserInfo(user_name) {
+            var content = {
+                'username': user_name
+            };
+            var com = {
+                'Type': 'getUserIdentify',
+                'Content': content
+            }
+            ws.send(JSON.stringify(com));
+        }
+        function searchUser() {
+            var content = {
+                'criteria': document.getElementById("searchContent").value
+            };
+            var com = {
+                'Type': 'search',
+                'Content': content
+            }
+            ws.send(JSON.stringify(com));
+        }
+
+        function display(part_id) {
+            document.getElementById(part_id).style.display = "block";
+        }
+
+        function disappear(part_id) {
+            document.getElementById(part_id).style.display = "none";
+        }
+
+        function send() { //验证聊天信息并发送
+            if (object_type == "user") {
+                msgContent.innerHTML += ("<font color='red'>" + selfName + ":</font><font color='red'>" + document.getElementById("sendMsg").value + "</font><br>");
+                for (var i = 0; i < chartList.length; i++) {
+                    if (chartList[i]["name"] == msg_to) {
+                        chartList[i]["html"] += ("<font color='red'>" + selfName + ":</font><font color='red'>" + document.getElementById("sendMsg").value + "</font><br>");
+                    }
+                }
+            }
+            var content = {
+                'object_type': object_type,
+                'to': msg_to,
+                'msg': document.getElementById("sendMsg").value
+            };
+            var com = {
+                'Type': 'sendMsg',
+                'Content': content
+            }
+            ws.send(JSON.stringify(com));
+            document.getElementById("sendMsg").value="";
+        }
+
+        function senfPost(){
+            var content={
+                    'msg':document.getElementById("sendMsg").value
+                    };
+            var com = {
+                'Type' : 'sendMsgPost',
+                'Content' : content
+        }
+        document.getElementById("sendMsg").value="";
+        ws.send(JSON.stringify(com));
+    }
+        function onerror() {
+            alert("很抱歉，服务器出现错误，当前窗口将关闭！");
+            window.opener = null;
+            window.close();
+        }
+
+        function Exit() {
+            alert("您已经退出聊天！");
+            window.location.href = "leave";
+        }
+
+
+        window.onbeforeunload = function () { //当用户单击浏览器中的关闭按钮时执行退出操作
+            if (event.clientY < 0 && event.clientX > document.body.scrollWidth) {
+                Exit(); //执行退出操作
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="content">
+    <table class="surface">
+        <tr>
+            <td>
+                <table class="surface-left">
+                    <tbody>
+                    <tr>
+                        <td class="sidebar">
+                            <div class="m-card">
+                                <head>
+                                    <img class="avatar" width="40" height="40" alt="Coffce" src="img/1.jpg">
+                                    <input id="button_info" type="button" class="btn_grey" value="登录用户"
+                                           onClick="showSelfInfo()"><br>
+                                </head>
+                            </div>
+                            <div class="m-nav">
+                                <input id="button_group" type="button" class="btn_grey" value="群组"
+                                       onClick="showGroup()"/>
+                                <input id="button_online" type="button" class="btn_grey" value="成员"
+                                       onClick="showUsers()"/>
+                            </div>
+                            <div id="mainList" class="nav-pane">列表</div>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tr>
+                        <td>
+
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+
+            <td>
+                <table class="surface-middle"></table>
+            </td>
+            <td>
+                <table class="surface-right">
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div id="chart" class="title"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <!--<div id="msgContent" class="message">聊天内容</div>-->
+                            <div class="message">
+                                <div id="msgContent" class="m-message">聊天内容</div>
+
+                                <div class="m-memberlist">
+                                    <div id="member" class="m-list1">
+                                        <div class="title1">成员</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <!--<td class="sendmessage">
+                            <input value="asd" onKeyDown="if(event.keyCode==13){send();}"/>
+                            <input class="btn_grey" value="发送" onClick="send()"/>
+                        </td>-->
+                        <td class="sendmessage">
+                            <input valign="bottom" id="sendMsg" type="text" size="70" value=""
+                                   onKeyDown="if(event.keyCode==13){send();}"/>
+                            <input valign="bottom" name="button_submit" type="button" class="btn_grey" value="发送"
+                                   onClick="send()"/>
+                            <!--<input type="button" class="btn_grey" value="公告" onClick="">-->
+                            <input style="display:none" id="postButton" name="button_submit" type="button" class="btn_grey" value="发送公告" onClick="senfPost()"/>
+                            <input name="button_exit" type="button"
+                                   class="btn_grey" value="退出登录" onClick="Exit()">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+</div>
+</body>
+</html>

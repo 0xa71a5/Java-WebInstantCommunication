@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>个人信息</title>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/Profile.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="css/Profile.css">
+    <!--<script language="javascript" src="js/AjaxRequest.js">--></script>
+    <script>
+
+        function parseJson(w) {
+            return eval("(" + w + ")");
+        }
+
+
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=")
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1
+                    c_end = document.cookie.indexOf(";", c_start)
+                    if (c_end == -1) c_end = document.cookie.length
+                    return unescape(document.cookie.substring(c_start, c_end))
+                }
+            }
+            return ""
+        }
+    </script>
+    <script language="javascript">
+        var selfName;
+        var xmlhttp = getXmlhttp();
+
+        function getXmlhttp() {
+            var xmlhttp;
+            if (window.XMLHttpRequest) {
+                xmlhttp = new XMLHttpRequest();
+            } else {
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            return xmlhttp;
+        }
+
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                Handle_Command(xmlhttp.responseText)
+            }
+        }
+        function ws_send(toSend) {
+            xmlhttp.open("POST", "profileAjax", true);
+            xmlhttp.send(toSend);
+        }
+
+        function Handle_Command(command) {
+            var recvStr = command;
+            console.log("recvStr:" + recvStr);
+            var jsonObject = parseJson(recvStr);//将字符串转换成json
+            var Type = jsonObject["Type"];        //获取json的Type字段
+            var Content = jsonObject["Content"];  //获取json的Content字段
+
+            if(Type=="getMyIdentifyResult"){//获取我的用户名
+                 selfName=Content["username"];
+                 getUserInfo(selfName);
+            }else if (Type == "getUserIdentifyResult") {
+                document.getElementById("username").innerHTML = Content["username"];
+                document.getElementById("sex").innerHTML = Content["sex"];
+                document.getElementById("nickname").innerHTML = Content["nickname"];
+                document.getElementById("password").innerHTML = Content["password"];
+                document.getElementById("email").innerHTML = Content["email"];
+                document.getElementById("telephone").innerHTML = Content["telephone"];
+                for (var i = 0; i < document.getElementById("m_department").options.length; i++) {
+                    if (document.getElementById("m_department").options[i].value == Content["department"]) {
+                        document.getElementById("department").innerHTML = document.getElementById("m_department").options[i].text;
+                        break;
+                    }
+                }
+                // document.getElementById("department").innerHTML=Content["department"];
+                showBlock("userInfoDlg");
+            } else if (Type == "modifyUserIdentifyResult") {
+                if (Content["result"] == "success") {
+                    alert("保存成功");
+                    getUserInfo(document.getElementById("username").innerHTML);
+                }
+            }        
+        }
+
+        window.onload = function () {
+            getMyIdentify();
+            // document.getElementById("m_department").selectedIndex=3;
+            // var des=document.getElementById("m_department").selectedIndex;
+            // alert(document.getElementById("m_department").select);
+
+            // alert(document.getElementById("m_department").value);
+            // document.getElementById("userListDlg").style.display="block";
+            // document.getElementById("userInfoDlg").style.display="none";
+            // document.getElementById("modifyUserForm").style.display="none";
+            // document.getElementById("userInfoDlg").style.display="none";
+            // document.getElementById("userListDlg").style.display="none";
+            // document.getElementById("userInfoDlg").style.display="none";
+            //alert(document.getElementById("m_username").value);
+        }
+
+
+
+        function getMyIdentify() {
+            var content = {'action': 'none'};
+            var com = {
+                'Type': 'getMyIdentify',
+                'Content': content
+            }
+            ws_send(JSON.stringify(com));
+        }
+
+        function showBlock(block_id) {
+            document.getElementById("userInfoDlg").style.display = "none";
+            document.getElementById("modifyUserForm").style.display = "none";
+
+            document.getElementById(block_id).style.display = "block";
+        }
+
+        function getUserInfo(user_name) {
+            var content = {'username': user_name};
+            var com = {
+                'Type': 'getUserIdentify',
+                'Content': content
+            }
+            ws_send(JSON.stringify(com));
+        }
+
+
+        function modifyInfo() {
+            if (document.getElementById("sex").innerHTML == "male") {
+                document.getElementById("optionsRadios1").checked = true;
+                document.getElementById("optionsRadios2").checked = false;
+            } else {
+                document.getElementById("optionsRadios2").checked = true;
+                document.getElementById("optionsRadios1").checked = false;
+            }
+            document.getElementById("m_username").value = document.getElementById("username").innerHTML;
+            document.getElementById("m_nickname").value = document.getElementById("nickname").innerHTML;
+            document.getElementById("m_password").value = document.getElementById("password").innerHTML;
+            document.getElementById("m_checkPassword").value = document.getElementById("password").innerHTML;
+            document.getElementById("m_email").value = document.getElementById("email").innerHTML;
+            document.getElementById("m_telephone").value = document.getElementById("telephone").innerHTML;
+            for (var i = 0; i < document.getElementById("m_department").options.length; i++) {
+                if (document.getElementById("m_department").options[i].text == document.getElementById("department").innerHTML) {
+                    document.getElementById("m_department").selectedIndex = i;
+                    break;
+                }
+            }
+            showBlock("modifyUserForm");
+        }
+
+        function saveModifyUserInfo() {
+            var tempSex;
+            var selectOp = document.getElementById("m_department").selectedIndex;
+            if (document.getElementById("optionsRadios1").checked) {
+                tempSex = "male";
+            } else {
+                tempSex = "female";
+            }
+            var content = {
+                'username': document.getElementById("m_username").value,
+                'nickname': document.getElementById("m_nickname").value,
+                'password': document.getElementById("m_password").value,
+                'email': document.getElementById("m_email").value,
+                'telephone': document.getElementById("m_telephone").value,
+                'department': document.getElementById("m_department").options[selectOp].value,
+                'sex': tempSex
+            };
+            var com = {
+                'Type': 'modifyUserIdentify',
+                'Content': content
+            }
+            ws_send(JSON.stringify(com));
+        }
+
+        function backToUserList() {
+            window.close();
+        }
+        function backToUserInfo() {
+            showBlock("userInfoDlg");
+        }
+        function onerror() {
+        }
+
+        function Exit() {
+        }
+
+    </script>
+</head>
+<body>
+<div class="container-fluid">
+    <div id="login_form" class="">
+        <div class="content-bottom jump-info">
+            <div class="modify-form" method="post" style="display:block;" name="userInfoDlg" action=""
+                 id="userInfoDlg">
+                <p>
+                    <bold>个人信息</bold>
+                </p>
+                <div class="self-info">
+                    <p>姓名：<font color="blue" id="username">用户名</font><br></p>
+                    <p>性别：<font color="blue" id="sex">性别</font><br></p>
+                    <p>昵称：<font color="blue" id="nickname">昵称</font><br></p>
+                    <p> 密码：<font color="blue" id="password">密码</font><br></p>
+                    <p> 公司邮箱：<font color="blue" id="email">公司邮箱</font><br></p>
+                    <p> 手机号码：<font color="blue" id="telephone">手机号码</font><br></p>
+                    <p>公司部门：<font color="blue" id="department">公司部门</font><br></p>
+                </div>
+                <div class="btn-select">
+                    <button class="btn btn-default" id="jump" type="button" value="modifyUserInfo"
+                            onclick="modifyInfo()">
+                        修改
+
+                    </button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-default" type="button" value="backToUserList"
+                            onclick="backToUserList()">
+                        返回
+                    </button>
+                </div>
+            </div>
+            <form class="modify-form" method="post" style="display:none;" name="modifyUserForm"
+                  action=""
+                  id="modifyUserForm">
+                <p>
+                    <bold>修改个人信息</bold>
+                </p>
+                <div class="modify-item">
+                    <input type="text" placeholder="用户名" id="m_username" required="" name="username"
+                           onblur="m_blurUsername()"
+                           onfocus="m_focusUsername()"/>
+                    <div class="warning" id="m_usernameWarning" style="display:none;">用户名不能为空</div>
+                    <input type="text" placeholder="昵称" id="m_nickname" required="" name="nickname"
+                           onblur="m_blurNickname()"
+                           onfocus="m_focusNickname()"/>
+                    <div class="warning" id="m_nicknameWarning" style="display:none;">昵称不能为空</div>
+                    <input type="password" placeholder="密码" id="m_password" required="" name="password"
+                           onblur="m_blurPassword()"
+                           onfocus="m_focusPassword()"/>
+                    <div class="warning" id="m_passwordWarning" style="display:none;">密码不能小于6位</div>
+                    <input type="password" placeholder="请再次输入密码" id="m_checkPassword" required=""
+                           name="password1"
+                           onblur="m_blurCheckpassword()" onfocus="m_focusCheckpassword()"/>
+                    <div class="warning" id="m_checkPasswordWarning" style="display:none;">输入密码不一致</div>
+                    <input type="text" placeholder="公司邮箱" id="m_email" required="" name="email"
+                           onblur="m_blurEmail()"
+                           onfocus="m_focusEmail()"/>
+                    <div class="warning" id="m_emailWarning" style="display:none;">邮箱不能为空</div>
+                    <input type="text" placeholder="手机号码" id="m_telephone" required="" name="telephone"
+                           onblur="m_blurTelephone()"
+                           onfocus="m_focusTelephone()"/>
+                    <div class="warning" id="m_telephoneWarning" style="display:none;">没有正确输入手机号码</div>
+                    <div class="department">
+                        <label class="control-label department-label">公司部门：</label>
+                        <select id="m_department" required="" name="department"/>
+                        <option value="department" selected>请选择部门</option>
+                        <option value="department1">办公室</option>
+                        <option value="department2">技术部</option>
+                        <option value="department3">生产部</option>
+                        <option value="department4">财务部</option>
+                        <option value="department5">营销部</option>
+                        </select>
+                    </div>
+                    <div class=" gender">
+                        <label class="control-label radio-label">性别：</label>
+                        <label class="radio-inline radio-gender">
+                            <input type="radio" id="optionsRadios1" value="male" required="" name="gender"
+                                   checked>
+                            男
+                        </label>
+                        <label class="radio-inline radio-gender1">
+                            <input type="radio" id="optionsRadios2" value="female" required=""
+                                   name="gender">
+                            女
+                        </label>
+                    </div>
+                </div>
+                <div class="btn-select">
+                    <button class="btn btn-default" type="button" type="button" value="backToUserList"
+                            onclick="backToUserInfo()">返回
+                    </button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-default" type="button" type="button"
+                            onClick="saveModifyUserInfo()">保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+</html>

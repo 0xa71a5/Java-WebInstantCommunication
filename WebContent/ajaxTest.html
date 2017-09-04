@@ -1,0 +1,43 @@
+<head>
+<meta charset="UTF-8">
+<script src="js/jquery-1.9.1.min.js"></script>
+
+<script type="text/javascript">  
+    function getXmlhttp() {  
+        var xmlhttp;  
+        if (window.XMLHttpRequest) { 
+            xmlhttp = new XMLHttpRequest();  
+        } else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");  
+        }  
+        return xmlhttp;  
+    }  
+    var xmlhttp = getXmlhttp();  
+    xmlhttp.onreadystatechange = function() {  
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {   
+                    Handle_Command(xmlhttp.responseText)  
+                }  
+            }   
+    function ws_send(toSend)
+    {
+        xmlhttp.open("POST", "ajaxTest", true);  
+        xmlhttp.send(toSend);  
+    }
+
+    function Handle_Command(command)
+    {
+        var recvStr=command;
+        console.log("recvStr:"+recvStr);
+        var jsonObject=parseJson(recvStr);//将字符串转换成json
+        var Type=jsonObject["Type"];        //获取json的Type字段
+        var Content=jsonObject["Content"];  //获取json的Content字段
+    }
+
+</script>  
+
+</head>
+<body>  
+    <button id="mybtn" onclick="test_send()">点击</button>  
+    <div id="myAjax"></div>  
+</body>  
+</html>

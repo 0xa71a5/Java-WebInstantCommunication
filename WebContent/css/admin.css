@@ -1,0 +1,477 @@
+.admin {
+    width: 720px;
+    margin: auto;
+}
+
+.form {
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    background: #FFFFFF;
+    max-width: 360px;
+    margin-top: 50%;
+    padding: 10px 40px 20px 40px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.form input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: solid 1px;
+    border-color: transparent;
+    margin: 4px 0 4px 0;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form button {
+    font-family: "Microsoft YaHei", "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4CAF50;
+    width: 100%;
+    border: 0;
+    padding: 15px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.form button:hover, .form button:active, .form button:focus {
+    background: #43A047;
+}
+
+.form .message a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.form .register-form {
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.container:before, .container:after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.container .info {
+    margin: 50px auto;
+    text-align: center;
+}
+
+.container .info h1 {
+    margin: 0 0 15px;
+    padding: 0;
+    font-size: 36px;
+    font-weight: 300;
+    color: #1a1a1a;
+}
+
+.container .info span {
+    color: #4d4d4d;
+    font-size: 12px;
+}
+
+.container .info span a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.container .info span .fa {
+    color: #EF3B3A;
+}
+
+body {
+    /*
+    background: #76b852; !* fallback for old browsers *!
+    background: -webkit-linear-gradient(right, #76b852, #8DC26F);
+    background: -moz-linear-gradient(right, #76b852, #8DC26F);
+    background: -o-linear-gradient(right, #76b852, #8DC26F);
+    background: linear-gradient(to left, #76b852, #8DC26F);
+    */
+    background: url(../img/bg_06.jpg) 0% 0% / cover no-repeat fixed;
+    font-family: "Roboto", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.shake_effect {
+    -webkit-animation-name: shake;
+    animation-name: shake;
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+}
+
+@-webkit-keyframes shake {
+    from, to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        -webkit-transform: translate3d(-10px, 0, 0);
+        transform: translate3d(-10px, 0, 0);
+    }
+
+    20%, 40%, 60%, 80% {
+        -webkit-transform: translate3d(10px, 0, 0);
+        transform: translate3d(10px, 0, 0);
+    }
+}
+
+@keyframes shake {
+    from, to {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        -webkit-transform: translate3d(-10px, 0, 0);
+        transform: translate3d(-10px, 0, 0);
+    }
+
+    20%, 40%, 60%, 80% {
+        -webkit-transform: translate3d(10px, 0, 0);
+        transform: translate3d(10px, 0, 0);
+    }
+}
+
+p.center {
+    color: #fff;
+    font-family: "Microsoft YaHei";
+}
+
+.radio-gender input {
+    padding: 12px;
+    margin: 4px 0 4px 0;
+
+}
+
+.radio-gender {
+    padding: 6px;
+    margin: 4px 0 4px 25%;
+    width: 10%;
+    float: left;
+    font-weight: normal;
+
+}
+
+.radio-gender1 {
+    padding: 6px;
+    margin: 4px 0 4px 0;
+    width: 10%;
+    float: left;
+    color: rgb(121, 117, 115);
+}
+
+.radio-label {
+    padding: 6px 6px 6px 40px;
+    margin: 4px 0 4px 0px;
+    width: 35%;
+    float: left;
+    color: rgb(121, 117, 115);
+}
+
+form select {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    border: 0;
+    width: 50%;
+    margin: 4px 0 4px 15%;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.department-label {
+    float: left;
+    padding: 12px;
+    margin: 4px 0 4px 0;
+    width: 35%;
+    color: rgb(121, 117, 115);
+}
+
+.gender {
+    float: left;
+    width: 100%;
+    height: auto;
+}
+
+.gender .radio-inline + .radio-inline {
+    margin: 4px 0 4px 15%;
+}
+
+.checkcode img {
+    width: 35%;
+    height: 44px;
+    margin: 4px 0 4px 0;
+    float: left;
+}
+
+.checkcode {
+
+}
+
+.warning {
+    color: #d9534f;
+    text-align: left;
+    width: 100%;
+    padding-left: 20px;
+    font-size: 12px;
+}
+
+.checkcode input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 50%;
+    border: solid 1px;
+    border-color: transparent;
+    margin: 4px 0 4px 15%;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.radio input[type="radio"], .radio-inline input[type="radio"], .checkbox input[type="checkbox"], .checkbox-inline input[type="checkbox"] {
+    position: absolute;
+    margin-left: -25px;
+}
+
+.cookie {
+    margin: 10px 10px 10px 0;
+    color: #b3b3b3;
+    font-size: 12px;
+    width: 35%;
+}
+
+.message {
+    display: inline;
+}
+
+.cookie label {
+    float: left;
+}
+
+.cookie input {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    margin: 3px 0 3px 0;
+    width: 12.67px;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    position: absolute;
+    margin-left: 5%;
+}
+
+.form .message {
+    margin: 10px 2.5% 10px 12.5%;
+    color: #b3b3b3;
+    font-size: 12px;
+}
+
+.message1 {
+    height: 36.67px;
+    vertical-align: middle;
+}
+
+.message1 .message {
+    height: 36.67px;
+    line-height: 36.67px;
+    margin: 0;
+}
+
+.warning1 {
+    padding-left: 60%;
+}
+
+/* Admin */
+.container-fluid {
+    width: 600px;
+    height: 600px;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    background: #FFFFFF;
+    margin-top: 10%;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    padding: 0;
+}
+
+.main {
+    position: relative;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+    float: left;
+}
+
+.modify-form input {
+    font-family: "Roboto", sans-serif;
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: solid 1px;
+    border-color: transparent;
+    margin: 4px 0 4px 0;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.checkcode input {
+    width: 50%;
+    border: solid 1px;
+    border-color: transparent;
+    margin: 4px 0 4px 15%;
+}
+
+#regist {
+    font-family: "Microsoft YaHei", "Roboto", sans-serif;
+    text-transform: uppercase;
+    outline: 0;
+    background: #4CAF50;
+    width: 100%;
+    border: 0;
+    padding: 15px;
+    color: #FFFFFF;
+    font-size: 14px;
+    -webkit-transition: all 0.2s ease;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.modify-form {
+
+}
+
+.menu {
+    height: 600px;
+    width: 200px;
+    padding: 40px 20px 40px 20px;
+    vertical-align: middle;
+}
+
+.t-menu {
+    width: 200px;
+    border-right: solid 2px rgba(200, 200, 200, 0.7);
+}
+
+.t-content {
+    width: 400px;
+    vertical-align: top;
+}
+
+.nav li {
+    height: 40px;
+    width: 100%;
+    border: solid 1px rgba(200, 200, 200, 0.7);
+    border-radius: 5px;
+    font-size: 20px;
+
+}
+
+.nav li:hover {
+    background-color: rgba(200, 200, 200, 0.7);
+}
+
+.nav li:active {
+    background-color: rgba(200, 200, 200, 0.9);
+}
+
+.search {
+    padding: 20px 0 20px 0;
+    border-bottom: solid 1px #eeeeee;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+.menu p {
+    margin: 6px;
+}
+
+.content-bottom {
+    height: 525px;
+}
+
+.modify-form p {
+    font-size: 20px;
+    padding: 10px 0 10px 0;
+}
+
+.self-info {
+    text-align: left;
+    margin: 6% 0 6% 20%;
+}
+
+.btn-select {
+    border-top: solid 1px rgba(200, 200, 200, 1);
+    padding: 30px 0;
+}
+
+.modify-item {
+    height: 382px;
+    padding: 10px 60px 10px 60px;
+}
+
+.modify-item input {
+    height: 36px;
+}
+
+.form select {
+    height: 36px;
+}
+
+.gender {
+    height: 36px;
+}
+
+.department {
+    height: 36px;
+}
+.department label{
+    height:36px;
+}
+#m_department{
+    height:36px;
+    padding:5px;
+}
+#optionsRadios1{
+ height:12.67px;
+}
+#optionsRadios2{
+    height:12.67px;
+}
+
+#groupsList p{
+    font-size:14px;
+}
